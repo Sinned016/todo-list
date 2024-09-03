@@ -5,19 +5,13 @@ import { EditIcon } from "./Icons/EditIcon";
 import Form from "./Form";
 import { CircleIcon } from "./Icons/CircleIcon";
 import { CheckedCircleIcon } from "./Icons/CheckedCircleIcon";
-import {
-  deleteTodo,
-  finishedTask,
-  undoFinishedTask,
-} from "../functions/TodoFunctions";
+import { TodoProps } from "../types/Types";
+import EditTodo from "./EditTodo";
 
 export default function TodoList() {
-  const [allTodos, setAllTodos] = useState<string[]>([]);
-  const [editIndex, setEditIndex] = useState<number | null>(null); // Track which todo is being edited
-  const [editValue, setEditValue] = useState<string>("");
-  const [allCheckedTodos, setAllCheckedTodos] = useState<string[]>([]);
-
-  console.log(allCheckedTodos);
+  const [allTodos, setAllTodos] = useState<TodoProps[]>([]);
+  const [addNewTodo, setAddNewTodo] = useState<boolean>(false);
+  const [editTodoIndex, setEditTodoIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const todos = localStorage.getItem("todos");
@@ -25,134 +19,96 @@ export default function TodoList() {
     if (todos) {
       setAllTodos(JSON.parse(todos));
     }
-
-    const finishedTodos = localStorage.getItem("finishedTodos");
-
-    if (finishedTodos) {
-      setAllCheckedTodos(JSON.parse(finishedTodos));
-    }
   }, []);
 
-  function startEdit(index: number) {
-    if (editIndex) {
-      setEditIndex(null);
-      setEditValue("");
-    }
-
-    setEditIndex(index);
-    setEditValue(allTodos[index]);
+  function deleteTodo(title: string) {
+    console.log(title);
+    const filteredTodos = allTodos.filter((todo) => todo.title !== title);
+    console.log(filteredTodos);
+    localStorage.setItem("todos", JSON.stringify(filteredTodos));
+    setAllTodos(filteredTodos);
   }
 
-  function saveEdit(todo: string) {
-    if (editIndex !== null) {
-      const newTodos = allTodos;
-      newTodos[editIndex] = editValue;
-      setAllTodos(newTodos);
-      localStorage.setItem("todos", JSON.stringify(newTodos));
-      setEditIndex(null);
-      setEditValue("");
-
-      if (allCheckedTodos.includes(todo)) {
-        const newFinishedTodos = allCheckedTodos.filter(
-          (item) => item !== todo
-        );
-
-        localStorage.setItem("finishedTodos", JSON.stringify(newFinishedTodos));
-
-        setAllCheckedTodos(newFinishedTodos);
-      }
-    }
-  }
-
-  function cancelEdit() {
-    setEditIndex(null);
-    setEditValue("");
-  }
+  const handleEdit = (index: number) => {
+    setEditTodoIndex(index === editTodoIndex ? null : index);
+  };
 
   return (
     <div>
-      <Form allTodos={allTodos} setAllTodos={setAllTodos} />
+      <div className="flex align-center justify-between mb-2">
+        <div>
+          <h3 className="text-xl font-bold">My tasks</h3>
+          <p className="">You have {allTodos.length} tasks left!</p>
+        </div>
 
-      <div className="max-h-[520px] overflow-y-auto">
-        {allTodos.length > 0 ? (
-          allTodos.map((todo, index) => (
-            <div
-              key={index}
-              className=" flex justify-between align-center p-6 border rounded mb-2 bg-gray-800 text-white"
-              style={{ opacity: 1, transform: "translateY(0)" }}
-            >
-              <div>
-                {editIndex === index ? (
-                  <input
-                    className="box-border p-2 text-black bg-gray-300 rounded w-96"
-                    type="text"
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        saveEdit(todo);
-                      }
-                    }}
-                  />
+        <button
+          onClick={() => setAddNewTodo(!addNewTodo)}
+          className=" bg-gray-600 hover:bg-gray-700 active:bg-gray-800 border-none px-10 py-2 text-white cursor-pointer rounded"
+        >
+          Add Task
+        </button>
+      </div>
+
+      {addNewTodo && (
+        <Form
+          allTodos={allTodos}
+          setAllTodos={setAllTodos}
+          setAddNewTodo={setAddNewTodo}
+        />
+      )}
+
+      <div className="max-h-[80vh] overflow-scroll">
+        {allTodos.map((todo, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between p-4 border-b border-gray-300 border rounded-lg mt-4 "
+          >
+            <div className="flex items-center gap-4">
+              <button className="cursor-pointer">
+                {todo.isDone ? (
+                  <CheckedCircleIcon width="24" height="24" />
                 ) : (
-                  <div className="flex items-center transition ease-in-out">
-                    {allCheckedTodos.includes(todo) ? (
-                      <CheckedCircleIcon
-                        className="mr-5 cursor-pointer"
-                        width="32"
-                        height="32"
-                        onClick={() =>
-                          undoFinishedTask(
-                            todo,
-                            allCheckedTodos,
-                            setAllCheckedTodos
-                          )
-                        }
-                      />
-                    ) : (
-                      <CircleIcon
-                        className="mr-5 cursor-pointer transition ease-in-out"
-                        width="32"
-                        height="32"
-                        color="white"
-                        onClick={() =>
-                          finishedTask(
-                            todo,
-                            allCheckedTodos,
-                            setAllCheckedTodos
-                          )
-                        }
-                      />
-                    )}
-
-                    <p className="">{todo}</p>
-                  </div>
+                  <CircleIcon width="24" height="24" />
                 )}
-              </div>
+              </button>
 
-              <div className="flex items-center">
-                {editIndex === index ? (
-                  <button className="mr-4" onClick={() => cancelEdit()}>
-                    <EditIcon width="24" height="24" />
-                  </button>
-                ) : (
-                  <button className="mr-4" onClick={() => startEdit(index)}>
-                    <EditIcon width="24" height="24" />
-                  </button>
-                )}
-
-                <button
-                  className="text-red-500 hover:text-red-600"
-                  onClick={() => deleteTodo(todo, allTodos, setAllTodos)}
-                >
-                  <DeleteIcon width="24" height="24" />
-                </button>
+              <div className="max-w-[250px]">
+                <h4 className="font-bold break-words mb-1">{todo.title}</h4>
+                <p className="text-gray-500 break-words">{todo.description}</p>
+                <p className="text-red-400 text-sm mt-1">{todo.dueDate}</p>
               </div>
             </div>
-          ))
-        ) : (
-          <h3 className="text-white font-normal text-lg">No tasks yet..</h3>
-        )}
+
+            <div className="flex gap-4">
+              <button
+                onClick={() => handleEdit(index)}
+                className="cursor-pointer"
+              >
+                <EditIcon width="24" height="24" />
+              </button>
+
+              <button
+                onClick={() => deleteTodo(todo.title)}
+                className="cursor-pointer"
+              >
+                <DeleteIcon width="24" height="24" />
+              </button>
+            </div>
+
+            {editTodoIndex === index && (
+              <EditTodo
+                index={index}
+                title={todo.title}
+                description={todo.description}
+                dueDate={todo.dueDate}
+                isDone={todo.isDone}
+                setEditTodoIndex={setEditTodoIndex}
+                allTodos={allTodos}
+                setAllTodos={setAllTodos}
+              />
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
