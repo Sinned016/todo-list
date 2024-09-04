@@ -58,7 +58,7 @@ export default function Form({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-2 font-primary absolute z-10 bg-slate-100 p-6 rounded-t-lg w-full left-0 bottom-0 h-[calc(100vh-6rem)] shadow-[0_15px_30px_rgba(0,0,0,0.4),0_5px_15px_rgba(0,0,0,0.2)]"
+      className="flex flex-col gap-2 font-primary absolute z-10 bottom-0 left-1/2  transform -translate-x-1/2 bg-slate-100 p-6 rounded-t-lg w-full sm:w-[600px] h-[calc(768px-6rem)] shadow-[0_15px_30px_rgba(0,0,0,0.4),0_5px_15px_rgba(0,0,0,0.2)]"
     >
       <h3 className="text-2xl font-bold mb-2">Edit Task</h3>
       <CloseIcon
