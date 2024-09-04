@@ -67,7 +67,7 @@ export default function TodoList() {
         {allTodos.map((todo, index) => (
           <div
             key={index}
-            className="flex items-center justify-between p-4 border-gray-500 bg-slate-100 border rounded-lg mt-4 "
+            className="flex items-center justify-between p-4 border-gray-500 bg-slate-50 border rounded-lg mt-4 "
           >
             <div className="flex items-center gap-4">
               <button
