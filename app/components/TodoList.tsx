@@ -22,9 +22,7 @@ export default function TodoList() {
   }, []);
 
   function deleteTodo(title: string) {
-    console.log(title);
     const filteredTodos = allTodos.filter((todo) => todo.title !== title);
-    console.log(filteredTodos);
     localStorage.setItem("todos", JSON.stringify(filteredTodos));
     setAllTodos(filteredTodos);
   }
